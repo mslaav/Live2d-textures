@@ -1,0 +1,27 @@
+name: Prune Everything Except PNGs
+
+on:
+  push:
+    branches:
+      - main  # Or your default branch
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch full history
+
+      - name: Delete Everything Except PNGs
+        run: |
+          find . -type f ! -name "*.png" -print0 | xargs -0 rm -f
+          find . -type d ! -path "./.git/*" -print0 | xargs -0 rm -rf
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .  # Add all changes (deleted files)
+          git commit -m "Removed all files and folders except PNGs"
+          git push origin main
